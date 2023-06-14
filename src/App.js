@@ -1,14 +1,20 @@
 
 import Chance from 'chance';
-import { AutoSizer, List } from 'react-virtualized';
+import { AutoSizer, List  , CellMeasurer , CellMeasurerCache } from 'react-virtualized';
 
 import './App.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState , useRef } from 'react';
 import Card from './component/Card';
 
 function App() {
 
   const chance = new Chance()
+  const cache = useRef(
+    new CellMeasurerCache({
+      fixedWidth: true,
+      defaultHeight: 20
+    })
+  );
   const [persons, setPersons] = useState([])
   useEffect(() => {
 
@@ -37,9 +43,16 @@ function App() {
                 height={height}
                 rowHeight={60}
                 rowCount={persons.length}
-                rowRenderer={({ key, index, style }) => {
+                rowRenderer={({ key, index, style , parent }) => {
                   const person = persons[index];
                   return (
+                    <CellMeasurer
+                      key={key}
+                      cache={cache.current}
+                      parent={parent}
+                      columnIndex={0}
+                      rowIndex={index}
+                    >
                     <div key={key} style={style}>
                       <Card
                           name={person.name}
@@ -47,6 +60,7 @@ function App() {
                         style={{ height: { height } }}
                       />
                     </div>
+                    </CellMeasurer>
                   );
                 }}
               />
